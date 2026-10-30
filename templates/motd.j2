@@ -1,0 +1,4 @@
+System memory       : {{ (ansible_facts['memtotal_mb'] | int) / 1024 }} GB
+Processor count     : {{ ansible_facts['processor_count'] }}
+Primary disk size   : {{ ansible_facts['devices']['vda']['size'] }}
+Secondary disk size : {% if ansible_facts['devices']['vdb'] is defined %}{{ ansible_facts['devices']['vdb']['size'] }}{% else %}NOT AVAILABLE{% endif %}
