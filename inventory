@@ -1,0 +1,26 @@
+rhce-control ansible_host=ansible-control.example.com
+
+[test]
+ansible1 ansible_host=ansible1.example.com
+
+[dev]
+ansible2 ansible_host=ansible2.example.com
+
+[prod]
+ansible3 ansible_host=ansible3.example.com
+ansible4 ansible_host=ansible4.example.com
+
+[servers:children]
+dev
+prod
+
+[managed:children]
+servers
+test
+
+[webservers]
+ansible1
+
+[webclients]
+ansible2
+ansible3
