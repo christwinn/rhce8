@@ -1,0 +1,17 @@
+---
+- name: create lisa
+  hosts: all
+  vars_files:
+    - .secret/vault.yml
+  vars: 
+    username: lisa
+  gather_facts: no
+  tasks:
+    - name: make the password
+      debug:
+        msg: "{{ password | password_hash('sha512', 'magicsalt') }}"
+
+    - name: make the lisa
+      ansible.builtin.user:
+        name: "{{ username }}"
+        password: "{{ password | password_hash('sha512', 'magicsalt') }}"

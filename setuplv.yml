@@ -1,0 +1,31 @@
+---
+- name: set up an lv named lvdata
+  hosts: all
+  vars: 
+    size: 2000
+  tasks:
+    - name: check to see if vgdata exists
+      block: 
+        - debug:  
+            msg: "vgdata does exist"
+        
+        - name: check the logical volume exists
+          community.general.lvol:
+            vg: vgdata
+            lv: lv2data
+            size: "{{ size }}"
+          register: output
+
+      rescue: 
+        - name: Insufficient Space Warning
+          debug:
+            msg: "Insufficient space"
+          when: output.err is defined and "insufficient" in output.err
+      
+      when: ansible_facts['lvm']['vgs']['vgdata'] is defined
+          
+    - name: alert user no vgdata exists
+      debug: 
+        msg: "vgdata does not exist"
+      when: ansible_facts['lvm']['vgs']['vgdata'] is not defined
+

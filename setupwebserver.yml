@@ -1,0 +1,63 @@
+---
+- name: set up webserver
+  hosts: webservers
+  vars: 
+    web_package: httpd
+    web_service: httpd
+    firewall_service: http
+    web_config_path: "/etc/httpd/conf.d/"
+    packages:
+      - "{{ web_package }}"
+      - firewalld
+
+  tasks:
+    - name: install the web server packages 
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: latest
+      loop: "{{ packages }}"
+      notify: 
+        - restart_services
+
+    - name: ensure the vhost directory is created
+      ansible.builtin.file:
+        dest: "/var/www/vhosts/{{ ansible_facts['hostname'] }}"
+        state: directory
+        setype: httpd_sys_content_t
+
+    - name: copy the vhost template
+      ansible.builtin.template:
+        src: web/templates/vhosts.conf.j2
+        dest: "{{ web_config_path }}{{ ansible_facts['hostname'] }}.conf"
+        owner: root
+        group: root
+        permission_mode: 0644
+        setype: httpd_config_t
+      notify: 
+        - restart_services
+
+    - name: copy the vhost template
+      ansible.builtin.template:
+        src: web/templates/index.html.j2
+        dest: "/var/www/vhosts/{{ ansible_facts['hostname'] }}/index.html"
+        setype: httpd_sys_content_t
+
+    - name: allow http thru the firewall
+      ansible.builtin.firewalld:
+        service: "{{ firewall_service }}"
+        state: enabled
+        permanent: true
+        immediate: true
+
+    - name: start the services
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+      loop: "{{ packages }}"
+
+  handlers:
+    - name: restart_services
+      ansible.builtin.service:
+        name: "{{ web_service }}"
+        state: restarted
+          #     loop: "{{ packages }}"

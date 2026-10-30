@@ -1,0 +1,6 @@
+---
+# defaults file for roles/sshd_config
+#
+allowed_users: unset
+sshport: 0
+permit_root: unset

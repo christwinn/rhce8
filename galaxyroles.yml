@@ -1,0 +1,14 @@
+---
+- name: install nginx with roles
+  hosts: ansible4
+  pre_tasks:
+    - name: A pre task
+      debug: 
+        msg: Hello World I run 1st
+  roles:
+    - role: geerlingguy.nginx
+  post_tasks:
+    - name: A post task
+      debug: 
+        msg: Hello World I run last
+

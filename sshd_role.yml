@@ -1,0 +1,14 @@
+---
+- name: call the sshd_config role
+  hosts: all
+  vars: 
+    allowed_users: "ansible"
+    sshport: 2022
+    permit_root: yes
+  pre_tasks:
+    - name: check selinux is enforcing
+      ansible.posix.selinux:
+        policy: targeted
+        state: enforcing
+  roles:
+    - role: roles/sshd_config

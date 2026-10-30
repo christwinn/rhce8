@@ -1,0 +1,3 @@
+Port {{ sshport}}
+PermitRootLogin {% if permit_root %}yes{% else %}no{% endif %} 
+AllowUsers {{ allowed_users }}

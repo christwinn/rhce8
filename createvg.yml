@@ -1,0 +1,39 @@
+---
+- name: create a volumegroup with parted
+  hosts: all
+  vars: 
+    partitions:
+      - index: 1
+        start: "0%"
+        end: "1GiB"
+      - index: 2
+        start: "1GiB"
+        end: "4GiB"
+      - index: 3
+        start: "4GiB"
+        end: "100%"
+  tasks:
+    #    - name: check for vdb
+    - block:
+        - name: debug
+          debug: 
+            msg: test 
+        - name: create the partitions
+          community.general.parted:
+            device: /dev/vdb
+            number: "{{ item['index'] }}"
+            part_start: "{{ item['start'] }}"
+            part_end: "{{ item['end'] }}"
+            state: present
+          loop: "{{ partitions }}"
+
+        - name: Create a VG
+          community.general.lvg:
+            vg: vgdata
+            pvs: 
+              - /dev/vdb1
+              - /dev/vdb2
+              - /dev/vdb3
+            state: present
+
+      when: ansible_facts['devices']['vdb'] is defined

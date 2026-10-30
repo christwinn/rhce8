@@ -1,0 +1,35 @@
+---
+- name: Setup Hosts
+  hosts: all
+  tasks:
+    - name: create user ansible
+      ansible.builtin.user:
+        name: ansible
+        password: "{{ 'password' | password_hash('sha512', 'saltysalty') }}"
+
+    - name: create sudoer file,  why not wheel? 
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/ansible
+        content: | 
+          ansible ALL=(ALL) ALL
+
+    - name: copy suthorized key
+      ansible.posix.authorized_key:
+        user: ansible
+        key: "{{ lookup('file', '/home/ansible/.ssh/id_ed25519.pub') }}"
+
+    - name: create sudoer to aloow 2 hour timeout
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/global
+        content: | 
+          Defaults timestamp_timeout=120
+          Defaults timestamp_type=global
+
+    - name: install python
+      ansible.builtin.dnf:
+        name: python3
+        state: latest
+
+
+       
+

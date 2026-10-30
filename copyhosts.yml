@@ -1,0 +1,8 @@
+---
+- name: copy host
+  hosts: all
+  tasks:
+    - name: copy template
+      ansible.builtin.template:
+        src: hosts.j2
+        dest: /etc/hosts

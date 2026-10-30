@@ -1,0 +1,6 @@
+---
+- name: install the web client packages 
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: latest
+  loop: "{{ packages }}"

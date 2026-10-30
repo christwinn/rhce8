@@ -1,0 +1,19 @@
+---
+- name: install a timer service
+  hosts: all
+  vars: 
+    s: "files"
+    d: "/etc/systemd/system"
+    files: 
+      - mylogger.timer
+      - mylogger.service
+  tasks: 
+    - name: copy files
+      ansible.builtin.copy:
+        src: "{{ s }}/{{ item }}"
+        dest: "{{ d }}/{{ item }}"
+      loop: "{{ files }}"
+       
+    - name: enable the timer
+      ansible.builtin.shell:
+        cmd: "systemctl enable --now mylogger.timer" 

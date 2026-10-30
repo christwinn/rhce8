@@ -1,0 +1,7 @@
+[Unit]
+Description=Write to the log file
+
+[Service]
+Type=oneshot
+ExecStart=logger -t "ANSIBLE" "Hello WORLD"
+

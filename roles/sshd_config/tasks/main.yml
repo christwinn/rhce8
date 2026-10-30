@@ -1,0 +1,34 @@
+---
+# tasks file for roles/sshd_config
+
+- name:
+  debug: 
+    msg: "OS Family is {{ ansible_facts['os_family'] }}"
+
+- name: Setting up sshd
+  block:
+    - name: Check values
+      debug:
+        msg: "Values required for allowed_users, sshport and permit_root"
+      when: allowed_users == "unset" or sshport == 0 or permit_root == "unset" 
+
+    - name: Copy SSHd template
+      template:
+        src: sshd_custom.conf.j2
+        dest: /etc/ssh/sshd_config.d/sshd_custom.conf
+      when: allowed_users != "unset" and sshport != 0 and permit_root != "unset" 
+      notify: restart_sshd
+
+    - name: Open the firewall port 
+      firewalld:
+        permanent: true
+        immediate: true
+        port: "{{ sshport }}/tcp"
+        state: enabled
+      when: sshport != 22 and sshport != 0
+
+    - name: set secontext on new ssh port
+      shell: 
+        cmd: "semanage port -a -t ssh_port_t -p tcp {{ sshport }}"
+
+  when: ansible_facts["os_family"] == 'RedHat'

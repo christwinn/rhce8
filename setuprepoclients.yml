@@ -1,0 +1,38 @@
+---
+- name: Setup RepoServer
+  hosts: managed
+  vars: 
+    repo: /etc/yum.repos.d
+  tasks:
+    - name: register appstream
+      ansible.builtin.shell: dnf config-manager --add-repo ftp://ansible-control.example.com/repo/AppStream/
+
+    - name: register appstream
+      ansible.builtin.shell: dnf config-manager --add-repo ftp://ansible-control.example.com/repo/BaseOS/
+
+    - name: get list of files in repo
+      ansible.builtin.shell: ls {{ repo }} | grep "^ansible-control"
+      register: gpg
+
+    - name: debug
+      debug:
+        msg: "{{ gpg.stdout_lines }}"
+
+    - name: set gpgpcheck= 0
+      ansible.builtin.lineinfile:
+        path: "{{ repo }}/{{ item }}"
+        regexp: "^gpgcheck"
+        line: "gpgcheck=0"
+      loop: "{{ gpg.stdout_lines | list }}"
+
+    - name: get list of files in repo
+      ansible.builtin.shell: ls {{ repo }} | grep -v "^ansible-control"
+      register: disable
+
+    - name: loop the files and delete
+      ansible.builtin.file:
+        path: "{{ repo }}/{{ item }}"
+        state: absent
+      loop: "{{ disable['stdout_lines'] | list }}"
+       
+
